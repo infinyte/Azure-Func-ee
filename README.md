@@ -45,7 +45,7 @@ public static class DocumentProcessor
 ```
 
 ### Benefits
-This architecture leverages Azure Functions' event-driven nature to create a scalable, cost-effective document processing system that only runs when needed. It's perfect for organizations that need to process variable volumes of documents without maintaining constant infrastructure.
+This architecture leverages Azure Functions' event-driven nature to create a scalable, cost-effective document processing system that only runs when needed. It's perfect for use cases that need to process variable volumes of documents without maintaining constant infrastructure.
 
 ## 2. IoT Device Management Platform
 
@@ -62,48 +62,60 @@ A comprehensive IoT platform that receives telemetry from devices through IoT Hu
 - **Azure IoT Hub**: Connect and manage IoT devices
 
 ### Implementation Highlights
-```python
-# Event Hub trigger function that processes device telemetry
-import logging
-import json
-import azure.functions as func
-import numpy as np
-
-def main(event: func.EventHubEvent, doc: func.Out[func.Document], signalr: func.Out[str]):
-    logging.info('Python Event Hub trigger function processed an event')
+```csharp
+// Event Hub trigger function that processes device telemetry
+[FunctionName("ProcessDeviceTelemetry")]
+public static async Task Run(
+    [EventHubTrigger("telemetry", Connection = "EventHubConnection")] string eventData,
+    [CosmosDB(
+        databaseName: "IoTDatabase",
+        collectionName: "ProcessedTelemetry",
+        ConnectionStringSetting = "CosmosDBConnection")] IAsyncCollector<dynamic> documentsOut,
+    [SignalR(HubName = "deviceAlerts")] IAsyncCollector<SignalRMessage> signalRMessages,
+    ILogger log)
+{
+    log.LogInformation("C# Event Hub trigger function processed an event");
     
-    # Parse the telemetry data
-    body = event.get_body().decode('utf-8')
-    telemetry = json.loads(body)
-    device_id = telemetry.get('deviceId')
+    // Parse the telemetry data
+    var telemetry = JsonConvert.DeserializeObject<dynamic>(eventData);
+    string deviceId = telemetry.deviceId;
     
-    # Process anomaly detection on temperature readings
-    if 'temperature' in telemetry:
-        # Simple anomaly detection - in reality, this could be more sophisticated
-        if telemetry['temperature'] > 30:  # Example threshold
-            alert = {
-                'deviceId': device_id,
-                'type': 'HighTemperature',
-                'value': telemetry['temperature'],
-                'timestamp': telemetry['timestamp'],
-                'message': f"High temperature detected: {telemetry['temperature']}°C"
-            }
+    // Process anomaly detection on temperature readings
+    if (telemetry.temperature != null)
+    {
+        // Simple anomaly detection - in reality, this could be more sophisticated
+        if (telemetry.temperature > 30) // Example threshold
+        {
+            var alert = new
+            {
+                deviceId = deviceId,
+                type = "HighTemperature",
+                value = telemetry.temperature,
+                timestamp = telemetry.timestamp,
+                message = $"High temperature detected: {telemetry.temperature}°C"
+            };
             
-            # Send real-time alert via SignalR
-            signalr.set(json.dumps({
-                'target': 'newAlert',
-                'arguments': [alert]
-            }))
+            // Send real-time alert via SignalR
+            await signalRMessages.AddAsync(
+                new SignalRMessage
+                {
+                    Target = "newAlert",
+                    Arguments = new[] { alert }
+                });
             
-            logging.info(f"Alert triggered for device {device_id}")
+            log.LogInformation($"Alert triggered for device {deviceId}");
+        }
+    }
     
-    # Store processed telemetry in Cosmos DB
-    doc.set(func.Document.from_dict({
-        'id': f"{device_id}-{telemetry.get('timestamp')}",
-        'deviceId': device_id,
-        'processedTelemetry': telemetry,
-        'processedTimestamp': datetime.datetime.utcnow().isoformat()
-    }))
+    // Store processed telemetry in Cosmos DB
+    await documentsOut.AddAsync(new
+    {
+        id = $"{deviceId}-{telemetry.timestamp}",
+        deviceId = deviceId,
+        processedTelemetry = telemetry,
+        processedTimestamp = DateTime.UtcNow.ToString("o")
+    });
+}
 ```
 
 ### Benefits
@@ -124,50 +136,87 @@ A set of interconnected microservices that communicate through events, using Azu
 - **Azure Cosmos DB**: Consistent data storage across services
 
 ### Implementation Highlights
-```javascript
-// Node.js implementation of an Order Processing function
-module.exports = async function (context, orderMessage) {
-    context.log('Processing new order', orderMessage.orderId);
-    
-    try {
-        // Validate order data
-        if (!orderMessage.items || orderMessage.items.length === 0) {
-            throw new Error('Order contains no items');
+```csharp
+// C# implementation of an Order Processing function
+public static class OrderProcessor
+{
+    [FunctionName("ProcessOrder")]
+    public static async Task Run(
+        [ServiceBusTrigger("orders", Connection = "ServiceBusConnection")] string orderMessage,
+        [CosmosDB(
+            databaseName: "OrdersDB",
+            collectionName: "ProcessedOrders",
+            ConnectionStringSetting = "CosmosDBConnection")] IAsyncCollector<dynamic> orderDocumentOut,
+        [ServiceBus("inventory", Connection = "ServiceBusConnection")] IAsyncCollector<dynamic> inventoryMessageOut,
+        [ServiceBus("order-failures", Connection = "ServiceBusConnection")] IAsyncCollector<dynamic> failureMessageOut,
+        ILogger log)
+    {
+        log.LogInformation("Processing new order");
+        
+        try
+        {
+            // Parse the order message
+            var order = JsonConvert.DeserializeObject<OrderMessage>(orderMessage);
+            
+            // Validate order data
+            if (order.Items == null || order.Items.Count == 0)
+            {
+                throw new Exception("Order contains no items");
+            }
+            
+            // Process the order (in reality, this would be more complex)
+            var processedOrder = new
+            {
+                id = order.OrderId,
+                customer = order.CustomerId,
+                items = order.Items,
+                total = order.Items.Sum(item => item.Price * item.Quantity),
+                status = "processing",
+                processedAt = DateTime.UtcNow.ToString("o")
+            };
+            
+            // Store the order in Cosmos DB
+            await orderDocumentOut.AddAsync(processedOrder);
+            
+            // Publish event for inventory service
+            await inventoryMessageOut.AddAsync(new
+            {
+                orderId = order.OrderId,
+                items = order.Items,
+                action = "reserve"
+            });
+            
+            log.LogInformation($"Order {order.OrderId} processed successfully");
         }
-        
-        // Process the order (in reality, this would be more complex)
-        const processedOrder = {
-            id: orderMessage.orderId,
-            customer: orderMessage.customerId,
-            items: orderMessage.items,
-            total: orderMessage.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-            status: 'processing',
-            processedAt: new Date().toISOString()
-        };
-        
-        // Store the order in Cosmos DB
-        context.bindings.orderDocument = JSON.stringify(processedOrder);
-        
-        // Publish event for inventory service
-        context.bindings.inventoryMessage = {
-            orderId: orderMessage.orderId,
-            items: orderMessage.items,
-            action: 'reserve'
-        };
-        
-        context.log(`Order ${orderMessage.orderId} processed successfully`);
-        
-    } catch (error) {
-        context.log.error(`Error processing order ${orderMessage.orderId}: ${error.message}`);
-        
-        // Publish failure event
-        context.bindings.failureMessage = {
-            orderId: orderMessage.orderId,
-            reason: error.message,
-            timestamp: new Date().toISOString()
-        };
+        catch (Exception ex)
+        {
+            log.LogError($"Error processing order: {ex.Message}");
+            
+            // Publish failure event
+            await failureMessageOut.AddAsync(new
+            {
+                orderId = JsonConvert.DeserializeObject<dynamic>(orderMessage)?.orderId ?? "unknown",
+                reason = ex.Message,
+                timestamp = DateTime.UtcNow.ToString("o")
+            });
+        }
     }
-};
+    
+    // Helper class to deserialize order messages
+    public class OrderMessage
+    {
+        public string OrderId { get; set; }
+        public string CustomerId { get; set; }
+        public List<OrderItem> Items { get; set; }
+    }
+    
+    public class OrderItem
+    {
+        public string ProductId { get; set; }
+        public decimal Price { get; set; }
+        public int Quantity { get; set; }
+    }
+}
 ```
 
 ### Benefits
@@ -296,296 +345,89 @@ A data processing pipeline that extracts data from various sources, transforms i
 - **Azure Storage**: Intermediate data storage
 
 ### Implementation Highlights
-```python
-# Timer-triggered orchestrator function that manages the ETL process
-import datetime
-import logging
-import azure.functions as func
-import azure.durable_functions as df
-
-def orchestrator_function(context: df.DurableOrchestrationContext):
-    """Orchestrates the ETL pipeline execution."""
-    
-    # Get the current date for processing
-    current_date = context.current_utc_datetime.date().isoformat()
-    
-    # Step 1: Extract data from various sources in parallel
-    extraction_tasks = []
-    data_sources = ["sales", "inventory", "customers", "products"]
-    
-    for source in data_sources:
-        extraction_tasks.append(context.call_activity("ExtractData", {
-            "source": source,
-            "date": current_date
-        }))
-    
-    # Wait for all extraction tasks to complete
-    extraction_results = yield context.task_all(extraction_tasks)
-    
-    # Step 2: Transform the data
-    transform_tasks = []
-    for i, source in enumerate(data_sources):
-        if extraction_results[i]["success"]:
-            transform_tasks.append(context.call_activity("TransformData", {
-                "source": source,
-                "blob_path": extraction_results[i]["blob_path"],
-                "date": current_date
-            }))
-    
-    # Wait for all transformation tasks to complete
-    transform_results = yield context.task_all(transform_tasks)
-    
-    # Step 3: Load data into the data warehouse
-    load_results = yield context.call_activity("LoadDataWarehouse", {
-        "transformed_data": [r["output_path"] for r in transform_results if r["success"]],
-        "date": current_date
-    })
-    
-    # Step 4: Generate reports
-    if load_results["success"]:
-        yield context.call_activity("GenerateReports", {
-            "date": current_date
-        })
-    
-    return {
-        "pipeline_id": context.instance_id,
-        "execution_date": current_date,
-        "status": "completed",
-        "extraction_success": sum(1 for r in extraction_results if r["success"]),
-        "transform_success": sum(1 for r in transform_results if r["success"]),
-        "load_success": load_results["success"]
-    }
-
-main = df.Orchestrator.create(orchestrator_function)
-```
-
-### Benefits
-This solution leverages Azure Functions' scheduling capabilities and the Durable Functions extension to create a reliable, orchestrated data pipeline. The serverless approach eliminates the need to maintain dedicated ETL servers while providing the necessary compute power when needed.
-
-## 6. Serverless API for Legacy System Integration
-
-### Overview
-A modern API layer built with Azure Functions that sits in front of legacy systems, providing standardized API access while handling authentication, rate limiting, and data transformation.
-
-### Architecture Components
-- **HTTP Trigger Functions**: Modern API endpoints
-- **Azure API Management**: API governance and developer portal
-- **Azure Key Vault**: Secure storage for legacy system credentials
-- **Azure Active Directory**: Modern authentication for API consumers
-- **Azure Cache for Redis**: Performance optimization for frequent queries
-- **Azure Application Insights**: API monitoring and analytics
-
-### Implementation Highlights
 ```csharp
-// HTTP Trigger function that provides a modern API for a legacy inventory system
-[FunctionName("GetInventoryItems")]
-public static async Task<IActionResult> GetInventoryItems(
-    [HttpTrigger(AuthorizationLevel.Function, "get", Route = "inventory")] HttpRequest req,
-    [CosmosDB(
-        databaseName: "CacheDb",
-        collectionName: "InventoryCache",
-        ConnectionStringSetting = "CosmosDbConnection",
-        SqlQuery = "SELECT * FROM c WHERE c.type = 'inventory' AND c.expiryTime > {DateTime.UtcNow}")] IEnumerable<dynamic> cacheItems,
-    ILogger log)
+// Timer-triggered orchestrator function that manages the ETL process
+public static class ETLPipelineOrchestrator
 {
-    log.LogInformation("Processing inventory API request");
-    
-    // Try to get from cache first
-    if (cacheItems != null && cacheItems.Any())
+    [FunctionName("ETLPipelineOrchestrator")]
+    public static async Task<object> RunOrchestrator(
+        [OrchestrationTrigger] IDurableOrchestrationContext context,
+        ILogger log)
     {
-        log.LogInformation("Returning cached inventory data");
-        return new OkObjectResult(cacheItems.FirstOrDefault().data);
-    }
-    
-    // Parse query parameters
-    string category = req.Query["category"];
-    string location = req.Query["location"];
-    
-    try
-    {
-        // Get credentials from Key Vault (in a real app, use Managed Identity)
-        string legacySystemUsername = Environment.GetEnvironmentVariable("LegacySystemUsername");
-        string legacySystemPassword = Environment.GetEnvironmentVariable("LegacySystemPassword");
+        // Get the current date for processing
+        string currentDate = context.CurrentUtcDateTime.Date.ToString("yyyy-MM-dd");
         
-        // Connect to legacy system (simplified for example)
-        var legacyClient = new LegacySystemClient(legacySystemUsername, legacySystemPassword);
+        // Step 1: Extract data from various sources in parallel
+        var dataSources = new[] { "sales", "inventory", "customers", "products" };
+        var extractionTasks = new List<Task<Dictionary<string, object>>>();
         
-        // Map modern API parameters to legacy system format
-        var legacyParams = new Dictionary<string, string>();
-        if (!string.IsNullOrEmpty(category))
-            legacyParams["CAT"] = TranslateCategoryCode(category);
-        if (!string.IsNullOrEmpty(location))
-            legacyParams["LOC_ID"] = location;
-        
-        // Call legacy system
-        var legacyResponse = await legacyClient.GetInventoryAsync(legacyParams);
-        
-        // Transform legacy response to modern API format
-        var apiResponse = TransformLegacyInventoryResponse(legacyResponse);
-        
-        // Cache the result for future requests
-        await CacheInventoryData(apiResponse);
-        
-        return new OkObjectResult(apiResponse);
-    }
-    catch (Exception ex)
-    {
-        log.LogError($"Error accessing legacy system: {ex.Message}");
-        return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-    }
-}
-
-// Helper method to transform legacy system response
-private static object TransformLegacyInventoryResponse(string legacyResponse)
-{
-    // Parse the fixed-width or other legacy format
-    // Transform to clean JSON structure
-    // (Implementation details omitted for brevity)
-    
-    // Example return structure
-    return new
-    {
-        items = new[]
+        foreach (var source in dataSources)
         {
-            new { id = "123", name = "Widget A", quantity = 42, location = "WAREHOUSE-1" },
-            new { id = "456", name = "Widget B", quantity = 16, location = "WAREHOUSE-2" }
-        },
-        totalCount = 2,
-        asOf = DateTime.UtcNow
-    };
-}
-```
-
-### Benefits
-This approach uses Azure Functions to create a modern API façade over legacy systems without requiring significant changes to the legacy applications themselves. The serverless API layer handles modern concerns like authentication, rate limiting, and API management while abstracting away the complexities of the legacy systems.
-
-## 7. Automated Media Processing Workflow
-
-### Overview
-A serverless workflow for processing media files (images, videos, audio) that handles tasks like format conversion, thumbnail generation, transcoding, and metadata extraction.
-
-### Architecture Components
-- **Blob Trigger Functions**: Process new media file uploads
-- **Queue Trigger Functions**: Manage processing tasks
-- **Durable Functions**: Orchestrate complex media workflows
-- **Event Grid**: Notify subscribers of processing completion
-- **Azure Media Services**: For advanced video processing
-- **Azure Cognitive Services**: Extract metadata from media
-- **Azure Blob Storage**: Store original and processed media
-
-### Implementation Highlights
-```csharp
-// Blob trigger that initiates media processing workflow
-[FunctionName("ProcessNewMedia")]
-public static async Task ProcessNewMedia(
-    [BlobTrigger("uploads/{name}", Connection = "StorageConnection")] Stream mediaFile,
-    string name,
-    [DurableClient] IDurableOrchestrationClient starter,
-    ILogger log)
-{
-    log.LogInformation($"Processing new media file: {name}");
-    
-    // Determine media type based on extension
-    string extension = Path.GetExtension(name).ToLowerInvariant();
-    string mediaType = GetMediaType(extension);
-    
-    // Start orchestration based on media type
-    string instanceId;
-    switch (mediaType)
-    {
-        case "image":
-            instanceId = await starter.StartNewAsync("ImageProcessingOrchestrator", null, new
+            extractionTasks.Add(context.CallActivityAsync<Dictionary<string, object>>("ExtractData", 
+                new Dictionary<string, string>
+                {
+                    { "source", source },
+                    { "date", currentDate }
+                }));
+        }
+        
+        // Wait for all extraction tasks to complete
+        var extractionResults = await Task.WhenAll(extractionTasks);
+        
+        // Step 2: Transform the data
+        var transformTasks = new List<Task<Dictionary<string, object>>>();
+        
+        for (int i = 0; i < dataSources.Length; i++)
+        {
+            if ((bool)extractionResults[i]["success"])
             {
-                FileName = name,
-                ContainerName = "uploads",
-                OutputContainer = "processed-images"
-            });
-            break;
+                transformTasks.Add(context.CallActivityAsync<Dictionary<string, object>>("TransformData", 
+                    new Dictionary<string, string>
+                    {
+                        { "source", dataSources[i] },
+                        { "blob_path", (string)extractionResults[i]["blob_path"] },
+                        { "date", currentDate }
+                    }));
+            }
+        }
+        
+        // Wait for all transformation tasks to complete
+        var transformResults = await Task.WhenAll(transformTasks);
+        
+        // Step 3: Load data into the data warehouse
+        var transformedPaths = transformResults
+            .Where(r => (bool)r["success"])
+            .Select(r => (string)r["output_path"])
+            .ToList();
             
-        case "video":
-            instanceId = await starter.StartNewAsync("VideoProcessingOrchestrator", null, new
+        var loadResults = await context.CallActivityAsync<Dictionary<string, object>>("LoadDataWarehouse", 
+            new Dictionary<string, object>
             {
-                FileName = name,
-                ContainerName = "uploads",
-                OutputContainer = "processed-videos"
+                { "transformed_data", transformedPaths },
+                { "date", currentDate }
             });
-            break;
-            
-        case "audio":
-            instanceId = await starter.StartNewAsync("AudioProcessingOrchestrator", null, new
-            {
-                FileName = name,
-                ContainerName = "uploads",
-                OutputContainer = "processed-audio"
-            });
-            break;
-            
-        default:
-            log.LogWarning($"Unsupported media type for file: {name}");
-            return;
+        
+        // Step 4: Generate reports
+        if ((bool)loadResults["success"])
+        {
+            await context.CallActivityAsync("GenerateReports", 
+                new Dictionary<string, string>
+                {
+                    { "date", currentDate }
+                });
+        }
+        
+        return new
+        {
+            pipeline_id = context.InstanceId,
+            execution_date = currentDate,
+            status = "completed",
+            extraction_success = extractionResults.Count(r => (bool)r["success"]),
+            transform_success = transformResults.Count(r => (bool)r["success"]),
+            load_success = loadResults["success"]
+        };
     }
     
-    log.LogInformation($"Started {mediaType} processing orchestration with ID: {instanceId}");
-}
-
-// Durable orchestrator function for image processing
-[FunctionName("ImageProcessingOrchestrator")]
-public static async Task<object> RunImageOrchestrator(
-    [OrchestrationTrigger] IDurableOrchestrationContext context)
-{
-    var input = context.GetInput<dynamic>();
-    string fileName = input.FileName;
-    string containerName = input.ContainerName;
-    string outputContainer = input.OutputContainer;
-    
-    // Define list of outputs to generate
-    var outputs = new List<string>();
-    
-    // Step 1: Generate thumbnail
-    var thumbnailResult = await context.CallActivityAsync<string>(
-        "GenerateThumbnail",
-        new { FileName = fileName, ContainerName = containerName });
-    outputs.Add(thumbnailResult);
-    
-    // Step 2: Extract metadata in parallel with optimizing the image
-    var metadataTask = context.CallActivityAsync<dynamic>(
-        "ExtractImageMetadata",
-        new { FileName = fileName, ContainerName = containerName });
-    
-    var optimizeTask = context.CallActivityAsync<string>(
-        "OptimizeImage",
-        new { FileName = fileName, ContainerName = containerName });
-    
-    // Wait for both tasks to complete
-    await Task.WhenAll(metadataTask, optimizeTask);
-    outputs.Add(optimizeTask.Result);
-    
-    // Step 3: Store metadata
-    await context.CallActivityAsync(
-        "StoreMediaMetadata",
-        new { 
-            FileName = fileName, 
-            MediaType = "image", 
-            Metadata = metadataTask.Result 
-        });
-    
-    // Step 4: Notify subscribers
-    await context.CallActivityAsync(
-        "NotifyMediaProcessed",
-        new { 
-            FileName = fileName, 
-            MediaType = "image", 
-            Outputs = outputs 
-        });
-    
-    return new {
-        Status = "Completed",
-        FileName = fileName,
-        ProcessedOutputs = outputs,
-        Metadata = metadataTask.Result
-    };
-}
-```
-
-### Benefits
-This architecture leverages Azure Functions' event-driven nature to create a scalable media processing pipeline. The serverless approach handles variable processing loads efficiently, scaling out during high-demand periods and scaling to zero during quiet times.
+    [FunctionName("ETLPipelineTrigger")]
+    public static async Task TimerTrigger(
+        [TimerTrigger("0 0 2 * * *")] TimerInfo timer, // Runs daily
