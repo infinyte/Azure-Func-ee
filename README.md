@@ -1,4 +1,4 @@
-# Azure Functions Sample Projects
+# Azure Functions Samples
 
 ## 1. Real-Time Document Processing Pipeline
 
