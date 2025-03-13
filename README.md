@@ -1,4 +1,4 @@
-# Innovative Azure Functions Projects
+# Azure Functions Sample Projects
 
 ## 1. Real-Time Document Processing Pipeline
 
