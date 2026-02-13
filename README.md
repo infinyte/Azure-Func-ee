@@ -1,4 +1,8 @@
-# Azure Functions Samples
+# Azure Functions Examples
+
+## Summary
+
+This repository is a collection of example uses and best practices for Azure Functions, designed to help users efficiently implement various functionalities. Keywords: Azure Functions, best practices, examples, sample implementations.
 
 ## 1. Real-Time Document Processing Pipeline
 
