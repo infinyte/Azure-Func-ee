@@ -61,12 +61,26 @@ jobs:
           --no-build
           --output ./publish/Scenario01.DocumentProcessing
 
+      - name: Publish Scenario02.RealtimeNotifications
+        run: >
+          dotnet publish src/Scenario02.RealtimeNotifications/Scenario02.RealtimeNotifications.csproj
+          --configuration Release
+          --no-build
+          --output ./publish/Scenario02.RealtimeNotifications
+
       - name: Publish Scenario03.EventDrivenOrchestration
         run: >
           dotnet publish src/Scenario03.EventDrivenOrchestration/Scenario03.EventDrivenOrchestration.csproj
           --configuration Release
           --no-build
           --output ./publish/Scenario03.EventDrivenOrchestration
+
+      - name: Publish Scenario05.ScheduledEtlPipeline
+        run: >
+          dotnet publish src/Scenario05.ScheduledEtlPipeline/Scenario05.ScheduledEtlPipeline.csproj
+          --configuration Release
+          --no-build
+          --output ./publish/Scenario05.ScheduledEtlPipeline
 
       - name: Upload published artifacts
         uses: actions/upload-artifact@v4
@@ -81,7 +95,9 @@ jobs:
     environment: ${{ inputs.environment || 'dev' }}
     outputs:
       function_app_name_scenario01: ${{ steps.tf-output.outputs.function_app_name_scenario01 }}
+      function_app_name_scenario02: ${{ steps.tf-output.outputs.function_app_name_scenario02 }}
       function_app_name_scenario03: ${{ steps.tf-output.outputs.function_app_name_scenario03 }}
+      function_app_name_scenario05: ${{ steps.tf-output.outputs.function_app_name_scenario05 }}
 
     steps:
       - name: Checkout repository
@@ -103,8 +119,10 @@ jobs:
       - name: Get Terraform Outputs
         id: tf-output
         run: |
-          echo "function_app_name_scenario01=$(terraform output -raw function_app_name_scenario01)" >> "$GITHUB_OUTPUT"
-          echo "function_app_name_scenario03=$(terraform output -raw function_app_name_scenario03)" >> "$GITHUB_OUTPUT"
+          echo "function_app_name_scenario01=$(terraform output -raw document_processing_function_app)" >> "$GITHUB_OUTPUT"
+          echo "function_app_name_scenario02=$(terraform output -raw realtime_notifications_function_app)" >> "$GITHUB_OUTPUT"
+          echo "function_app_name_scenario03=$(terraform output -raw event_orchestration_function_app)" >> "$GITHUB_OUTPUT"
+          echo "function_app_name_scenario05=$(terraform output -raw scheduled_etl_function_app)" >> "$GITHUB_OUTPUT"
         working-directory: terraform/environments/${{ inputs.environment || 'dev' }}
 
   deploy-functions:
@@ -133,11 +151,25 @@ jobs:
           package: ./publish/Scenario01.DocumentProcessing
           slot-name: staging
 
+      - name: Deploy Scenario02 to staging slot
+        uses: azure/functions-action@v1
+        with:
+          app-name: ${{ needs.deploy-infrastructure.outputs.function_app_name_scenario02 }}
+          package: ./publish/Scenario02.RealtimeNotifications
+          slot-name: staging
+
       - name: Deploy Scenario03 to staging slot
         uses: azure/functions-action@v1
         with:
           app-name: ${{ needs.deploy-infrastructure.outputs.function_app_name_scenario03 }}
           package: ./publish/Scenario03.EventDrivenOrchestration
+          slot-name: staging
+
+      - name: Deploy Scenario05 to staging slot
+        uses: azure/functions-action@v1
+        with:
+          app-name: ${{ needs.deploy-infrastructure.outputs.function_app_name_scenario05 }}
+          package: ./publish/Scenario05.ScheduledEtlPipeline
           slot-name: staging
 
       - name: Smoke test - Scenario01
@@ -176,6 +208,42 @@ jobs:
             exit 1
           fi
 
+      - name: Smoke test - Scenario02
+        run: |
+          HEALTH_URL="https://${{ needs.deploy-infrastructure.outputs.function_app_name_scenario02 }}-staging.azurewebsites.net/api/health"
+          echo "Testing health endpoint: $HEALTH_URL"
+          for i in {1..10}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || true)
+            if [ "$STATUS" = "200" ]; then
+              echo "Health check passed for Scenario02"
+              break
+            fi
+            echo "Attempt $i: received status $STATUS, retrying in 15s..."
+            sleep 15
+          done
+          if [ "$STATUS" != "200" ]; then
+            echo "Health check failed for Scenario02 with status $STATUS"
+            exit 1
+          fi
+
+      - name: Smoke test - Scenario05
+        run: |
+          HEALTH_URL="https://${{ needs.deploy-infrastructure.outputs.function_app_name_scenario05 }}-staging.azurewebsites.net/api/health"
+          echo "Testing health endpoint: $HEALTH_URL"
+          for i in {1..10}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || true)
+            if [ "$STATUS" = "200" ]; then
+              echo "Health check passed for Scenario05"
+              break
+            fi
+            echo "Attempt $i: received status $STATUS, retrying in 15s..."
+            sleep 15
+          done
+          if [ "$STATUS" != "200" ]; then
+            echo "Health check failed for Scenario05 with status $STATUS"
+            exit 1
+          fi
+
       - name: Swap staging to production - Scenario01
         uses: azure/CLI@v2
         with:
@@ -186,6 +254,16 @@ jobs:
               --slot staging \
               --target-slot production
 
+      - name: Swap staging to production - Scenario02
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            az webapp deployment slot swap \
+              --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+              --name "${{ needs.deploy-infrastructure.outputs.function_app_name_scenario02 }}" \
+              --slot staging \
+              --target-slot production
+
       - name: Swap staging to production - Scenario03
         uses: azure/CLI@v2
         with:
@@ -193,5 +271,15 @@ jobs:
             az webapp deployment slot swap \
               --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
               --name "${{ needs.deploy-infrastructure.outputs.function_app_name_scenario03 }}" \
+              --slot staging \
+              --target-slot production
+
+      - name: Swap staging to production - Scenario05
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            az webapp deployment slot swap \
+              --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+              --name "${{ needs.deploy-infrastructure.outputs.function_app_name_scenario05 }}" \
               --slot staging \
               --target-slot production

@@ -14,6 +14,7 @@
 
 **Optional:**
 - Azure Cosmos DB Emulator (for Scenario 03 local development)
+- Azure SignalR Service Free-tier instance (for Scenario 02 -- no local emulator available)
 - Docker (for running Azurite and Cosmos DB Emulator in containers)
 
 ## Local Setup
@@ -84,6 +85,21 @@ Each function app needs a `local.settings.json` file. These files are git-ignore
 }
 ```
 
+**Scenario 02** (`src/Scenario02.RealtimeNotifications/local.settings.json`):
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "AzureSignalRConnectionString": "<your-signalr-connection-string>"
+  }
+}
+```
+
+> **Note:** Azure SignalR Service does not have a local emulator. Create a Free-tier (`Free_F1`) SignalR Service instance in Azure with **Serverless** mode and use its connection string for local development.
+
 **Scenario 03** (`src/Scenario03.EventDrivenOrchestration/local.settings.json`):
 
 ```json
@@ -96,6 +112,18 @@ Each function app needs a `local.settings.json` file. These files are git-ignore
     "OrderProcessing:CosmosConnectionString": "<your-connection-string>",
     "OrderProcessing:CosmosDatabaseName": "orders-db",
     "OrderProcessing:CosmosContainerName": "orders"
+  }
+}
+```
+
+**Scenario 05** (`src/Scenario05.ScheduledEtlPipeline/local.settings.json`):
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
   }
 }
 ```
@@ -154,7 +182,9 @@ func start
 |---------|-------|-------------|
 | `AzureFunctions.Shared.Tests` | Shared middleware, telemetry, resilience | Moq, FluentAssertions |
 | `Scenario01.DocumentProcessing.Tests` | Document processing functions and services | Moq, FluentAssertions |
+| `Scenario02.RealtimeNotifications.Tests` | Notification functions, services, routing | Moq, FluentAssertions |
 | `Scenario03.EventDrivenOrchestration.Tests` | Order orchestration functions, services, saga | Moq, FluentAssertions |
+| `Scenario05.ScheduledEtlPipeline.Tests` | ETL orchestrator, activities, validation, transform | Moq, FluentAssertions |
 | `Integration.Tests` | End-to-end flows against Azurite | Azurite, FluentAssertions |
 
 ### Running tests

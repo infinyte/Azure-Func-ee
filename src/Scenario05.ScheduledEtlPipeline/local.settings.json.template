@@ -1,0 +1,17 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": "<your-app-insights-connection-string>",
+    "EtlPipeline:RawContainer": "etl-raw",
+    "EtlPipeline:ValidatedContainer": "etl-validated",
+    "EtlPipeline:TransformedContainer": "etl-transformed",
+    "EtlPipeline:OutputContainer": "etl-output",
+    "EtlPipeline:PipelineRunsTable": "pipelineruns",
+    "EtlPipeline:CsvSourceContainer": "etl-raw",
+    "EtlPipeline:CsvSourceBlobName": "source-data.csv",
+    "EtlPipeline:ExternalApiBaseUrl": "https://api.external-data.internal",
+    "EtlPipeline:MaxRecordsPerSource": "10000"
+  }
+}

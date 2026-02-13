@@ -76,3 +76,34 @@ output "event_grid_topic_endpoint" {
   description = "Endpoint of the Event Grid topic."
   value       = module.event_orchestration.event_grid_topic_endpoint
 }
+
+# -----------------------------------------------------------------------------
+# Real-Time Notifications Outputs
+# -----------------------------------------------------------------------------
+output "realtime_notifications_function_app" {
+  description = "Name of the real-time notifications function app."
+  value       = module.realtime_notifications.function_app_name
+}
+
+output "realtime_notifications_function_hostname" {
+  description = "Hostname of the real-time notifications function app."
+  value       = module.realtime_notifications.function_app_hostname
+}
+
+output "signalr_service_name" {
+  description = "Name of the Azure SignalR Service."
+  value       = module.realtime_notifications.signalr_service_name
+}
+
+# -----------------------------------------------------------------------------
+# Scheduled ETL Pipeline Outputs
+# -----------------------------------------------------------------------------
+output "scheduled_etl_function_app" {
+  description = "Name of the scheduled ETL pipeline function app."
+  value       = module.scheduled_etl_pipeline.function_app_name
+}
+
+output "scheduled_etl_function_hostname" {
+  description = "Hostname of the scheduled ETL pipeline function app."
+  value       = module.scheduled_etl_pipeline.function_app_hostname
+}

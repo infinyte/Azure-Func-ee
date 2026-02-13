@@ -58,12 +58,26 @@ jobs:
           --no-build
           --output ./publish/Scenario01.DocumentProcessing
 
+      - name: Publish Scenario02.RealtimeNotifications
+        run: >
+          dotnet publish src/Scenario02.RealtimeNotifications/Scenario02.RealtimeNotifications.csproj
+          --configuration Release
+          --no-build
+          --output ./publish/Scenario02.RealtimeNotifications
+
       - name: Publish Scenario03.EventDrivenOrchestration
         run: >
           dotnet publish src/Scenario03.EventDrivenOrchestration/Scenario03.EventDrivenOrchestration.csproj
           --configuration Release
           --no-build
           --output ./publish/Scenario03.EventDrivenOrchestration
+
+      - name: Publish Scenario05.ScheduledEtlPipeline
+        run: >
+          dotnet publish src/Scenario05.ScheduledEtlPipeline/Scenario05.ScheduledEtlPipeline.csproj
+          --configuration Release
+          --no-build
+          --output ./publish/Scenario05.ScheduledEtlPipeline
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

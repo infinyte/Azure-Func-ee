@@ -1,0 +1,15 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": "<your-app-insights-connection-string>",
+    "AzureSignalRConnectionString": "<your-signalr-connection-string>",
+    "Notifications:NotificationsTable": "notifications",
+    "Notifications:SubscriptionsTable": "subscriptions",
+    "Notifications:DeliveryQueue": "notification-delivery",
+    "Notifications:SignalRBroadcastQueue": "signalr-broadcast",
+    "Notifications:SignalRHubName": "notifications",
+    "Notifications:DigestHourUtc": "8"
+  }
+}

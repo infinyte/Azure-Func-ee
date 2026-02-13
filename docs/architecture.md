@@ -2,31 +2,32 @@
 
 ## System Overview
 
-This project contains two Azure Functions applications, each deployed as an independent function app with its own infrastructure stack. Both share a common library of cross-cutting concerns.
+This project contains four Azure Functions applications, each deployed as an independent function app with its own infrastructure stack. All share a common library of cross-cutting concerns.
 
 ```
-+---------------------------------------------------+
-|                 AzureFunctions.Shared              |
-|  Middleware | Telemetry | Resilience | Models      |
-+----------+--------------------+-------------------+
-           |                    |
-           v                    v
-+---------------------+  +----------------------------+
-| Scenario 01         |  | Scenario 03                |
-| Document Processing |  | Event-Driven Orchestration |
-|                     |  |                            |
-| Blob Storage        |  | Service Bus                |
-| Queue Storage       |  | Event Grid                 |
-| Table Storage       |  | Cosmos DB                  |
-|                     |  | Durable Functions          |
-+---------------------+  +----------------------------+
-           |                    |
-           v                    v
-+---------------------------------------------------+
-|              Terraform Modules                     |
-|  core-infrastructure | function-app                |
-|  document-processing | event-orchestration         |
-+---------------------------------------------------+
++-------------------------------------------------------------------+
+|                      AzureFunctions.Shared                        |
+|       Middleware | Telemetry | Resilience | Models                 |
++------+-------------+----------------+------------------+---------+
+       |             |                |                  |
+       v             v                v                  v
++-----------+  +-----------+  +--------------+  +-------------+
+| Scenario  |  | Scenario  |  | Scenario     |  | Scenario    |
+| 01: Doc   |  | 02: Real  |  | 03: Event    |  | 05: ETL     |
+| Process   |  | Time      |  | Orchestrate  |  | Pipeline    |
+|           |  |           |  |              |  |             |
+| Blob      |  | SignalR   |  | Service Bus  |  | Durable     |
+| Queue     |  | Queue     |  | Event Grid   |  | Functions   |
+| Table     |  | Table     |  | Cosmos DB    |  | Blob        |
+|           |  | EventGrid |  | Durable Fn   |  | Table       |
++-----------+  +-----------+  +--------------+  +-------------+
+       |             |                |                  |
+       v             v                v                  v
++-------------------------------------------------------------------+
+|                     Terraform Modules                              |
+|  core-infrastructure | function-app | document-processing          |
+|  realtime-notifications | event-orchestration | scheduled-etl      |
++-------------------------------------------------------------------+
 ```
 
 ### Scenario 01: Document Processing Pipeline
@@ -42,6 +43,24 @@ Processes documents uploaded to Blob Storage through an asynchronous queue-based
 5. `GenerateProcessingReport` (TimerTrigger) runs daily at 2:00 AM UTC, aggregates statistics, and tracks metrics in Application Insights.
 
 **Storage:** Azure Table Storage with a single partition key (`documents`) and row key equal to the document ID.
+
+### Scenario 02: Real-Time Notification System
+
+Delivers notifications across multiple channels using SignalR for real-time in-app messaging and queue-based routing for email.
+
+**Data flow:**
+
+1. A notification request arrives via `POST /api/notifications`.
+2. `SendNotificationFunction` validates the request, persists the notification to Table Storage, and enqueues a delivery message to the `notification-delivery` queue.
+3. `ProcessNotificationFunction` (QueueTrigger) deserializes the message and routes by channel:
+   - **InApp** -- Enqueues to the `signalr-broadcast` queue.
+   - **Email** -- Calls `SimulatedEmailService`, then updates the notification status to Delivered.
+4. `BroadcastRealtimeFunction` (QueueTrigger on `signalr-broadcast`) sends a `SignalRMessageAction` targeting the specific user via Azure SignalR Service.
+5. `HandleSystemEventFunction` (EventGridTrigger) converts system events (e.g., resource provisioning, scaling) into notifications.
+6. `SendDigestFunction` (TimerTrigger, daily 8 AM) aggregates unread notifications per user into a digest summary.
+7. `ManageSubscriptionsFunction` (HTTP) provides GET/PUT endpoints for user notification preferences.
+
+**Storage:** Azure Table Storage with `notifications` table (PK=userId, RK=notificationId) and `subscriptions` table (PK=userId, RK=channel).
 
 ### Scenario 03: Event-Driven Orchestration
 
@@ -61,6 +80,26 @@ Orchestrates order fulfillment using the saga pattern with Durable Functions.
 5. `HandleInventoryEvent` (EventGridTrigger) processes inventory domain events and raises low-stock alerts.
 
 **Storage:** Cosmos DB (serverless) with order ID as the partition key (`/id`).
+
+### Scenario 05: Scheduled ETL Pipeline
+
+Extracts data from multiple sources in parallel using the fan-out/fan-in Durable Functions pattern, then validates, transforms, and loads results.
+
+**Data flow:**
+
+1. A timer fires daily at 1:00 AM UTC (`ScheduledEtlFunction`), or a manual trigger arrives via `POST /api/etl/trigger`.
+2. A `PipelineRun` entity is created in Table Storage with status `Pending`.
+3. `EtlOrchestratorFunction` (Durable Functions) fans out three extraction activities in parallel:
+   - **ExtractFromApiActivity** -- Fetches records from an external API (simulated).
+   - **ExtractFromCsvActivity** -- Parses a CSV file from the `etl-raw` blob container.
+   - **ExtractFromDatabaseActivity** -- Reads records from a data source (simulated).
+4. Results are merged (fan-in). The pipeline tolerates partial source failures.
+5. **ValidateDataActivity** applies configurable validation rules (Required, Regex, Range), partitioning records into valid and invalid sets.
+6. **TransformDataActivity** applies field mappings (Rename, Uppercase, Lowercase, Default) to produce the final output format.
+7. **LoadDataActivity** serializes the transformed records as JSON and writes them to the `etl-output` blob container.
+8. The `PipelineRun` is updated with summary statistics (total extracted, valid, invalid, loaded) and status `Completed`.
+
+**Storage:** Azure Table Storage for pipeline run tracking (`pipelineruns` table), Azure Blob Storage for staged data across four containers (`etl-raw`, `etl-validated`, `etl-transformed`, `etl-output`).
 
 ## Cross-Cutting Concerns
 
@@ -133,6 +172,7 @@ All data-plane access is secured via private endpoints and private DNS zones:
 | Key Vault | `privatelink.vaultcore.azure.net` |
 | Cosmos DB | `privatelink.documents.azure.com` |
 | Service Bus | `privatelink.servicebus.windows.net` |
+| SignalR Service | `privatelink.service.signalr.net` |
 
 ### Network
 
@@ -155,6 +195,7 @@ All data-plane access is secured via private endpoints and private DNS zones:
 | Table storage | Azure.Data.Tables | 12.9.1 |
 | Blob storage | Azure.Storage.Blobs | 12.22.2 |
 | Queue storage | Azure.Storage.Queues | 12.20.1 |
+| Real-time messaging | Azure SignalR Service | Serverless mode |
 | Resilience | Polly | 8.4.2 |
 | Telemetry | Application Insights | 2.22.0 |
 | Infrastructure | Terraform | >= 1.5 |

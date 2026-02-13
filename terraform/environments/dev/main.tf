@@ -101,3 +101,78 @@ module "event_orchestration" {
     environment = var.environment
   }
 }
+
+# -----------------------------------------------------------------------------
+# Private DNS Zone for SignalR
+# (created here because it is consumed by realtime-notifications only)
+# -----------------------------------------------------------------------------
+resource "azurerm_private_dns_zone" "signalr" {
+  name                = "privatelink.service.signalr.net"
+  resource_group_name = module.core.resource_group_name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "signalr" {
+  name                  = "signalr-vnet-link"
+  resource_group_name   = module.core.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.signalr.name
+  virtual_network_id    = module.core.vnet_id
+}
+
+# -----------------------------------------------------------------------------
+# Real-Time Notifications
+# -----------------------------------------------------------------------------
+module "realtime_notifications" {
+  source = "../../modules/realtime-notifications"
+
+  project_name                           = var.project_name
+  environment                            = var.environment
+  resource_group_name                    = module.core.resource_group_name
+  location                               = var.location
+  function_subnet_id                     = module.core.function_subnet_id
+  private_endpoints_subnet_id            = module.core.private_endpoints_subnet_id
+  log_analytics_workspace_id             = module.core.log_analytics_workspace_id
+  application_insights_connection_string = module.core.application_insights_connection_string
+  key_vault_uri                          = module.core.key_vault_uri
+  managed_identity_id                    = module.core.managed_identity_id
+  managed_identity_principal_id          = module.core.managed_identity_principal_id
+  managed_identity_client_id             = module.core.managed_identity_client_id
+  core_storage_account_name              = module.core.storage_account_name
+  core_storage_account_access_key        = module.core.storage_account_primary_access_key
+  core_storage_account_id                = module.core.storage_account_id
+  private_dns_zone_blob_id               = module.core.private_dns_zone_blob_id
+  private_dns_zone_signalr_id            = azurerm_private_dns_zone.signalr.id
+
+  tags = {
+    project     = var.project_name
+    environment = var.environment
+  }
+}
+
+# -----------------------------------------------------------------------------
+# Scheduled ETL Pipeline
+# -----------------------------------------------------------------------------
+module "scheduled_etl_pipeline" {
+  source = "../../modules/scheduled-etl-pipeline"
+
+  project_name                           = var.project_name
+  environment                            = var.environment
+  resource_group_name                    = module.core.resource_group_name
+  location                               = var.location
+  function_subnet_id                     = module.core.function_subnet_id
+  private_endpoints_subnet_id            = module.core.private_endpoints_subnet_id
+  log_analytics_workspace_id             = module.core.log_analytics_workspace_id
+  application_insights_connection_string = module.core.application_insights_connection_string
+  key_vault_uri                          = module.core.key_vault_uri
+  managed_identity_id                    = module.core.managed_identity_id
+  managed_identity_principal_id          = module.core.managed_identity_principal_id
+  managed_identity_client_id             = module.core.managed_identity_client_id
+  core_storage_account_name              = module.core.storage_account_name
+  core_storage_account_access_key        = module.core.storage_account_primary_access_key
+  core_storage_account_id                = module.core.storage_account_id
+  private_dns_zone_blob_id               = module.core.private_dns_zone_blob_id
+
+  tags = {
+    project     = var.project_name
+    environment = var.environment
+  }
+}

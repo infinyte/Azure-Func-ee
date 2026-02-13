@@ -5,13 +5,15 @@ A portfolio of production-grade Azure Functions implementations built on .NET 8 
 ## Highlights
 
 - **Saga orchestration with compensation** -- Durable Functions coordinate multi-step workflows and automatically roll back completed steps on failure
+- **Fan-out/fan-in ETL** -- Durable Functions extract from three sources in parallel, then merge, validate, transform, and load sequentially
+- **Real-time notifications** -- Azure SignalR Service serverless integration for instant in-app delivery with multi-channel routing
 - **Circuit breaker and resilience** -- Polly v8 retry, circuit breaker, and timeout strategies applied to all outbound HTTP calls
 - **Dead-letter handling** -- Service Bus messages that fail validation or processing are explicitly dead-lettered with structured reasons
 - **Middleware pipeline** -- Correlation ID propagation and centralized exception handling via `IFunctionsWorkerMiddleware`
 - **Repository pattern** -- Table Storage and Cosmos DB repositories behind interfaces for testability and swap-ability
 - **Managed identity** -- `DefaultAzureCredential` for all Azure service authentication; connection strings used only during local development
 - **Blue/green deployment** -- Staging slots with smoke tests before production swap
-- **Modular Terraform** -- Reusable modules for function apps, storage, Service Bus, Cosmos DB, and networking with private endpoints
+- **Modular Terraform** -- Reusable modules for function apps, storage, Service Bus, Cosmos DB, SignalR, and networking with private endpoints
 
 ## Scenarios
 
@@ -23,6 +25,14 @@ An event-driven document processing pipeline that ingests files uploaded to Blob
 **Key patterns:** Blob-to-queue fan-out, Table Storage repository, content-type inference, daily scheduled reporting
 **Source:** [`src/Scenario01.DocumentProcessing/`](src/Scenario01.DocumentProcessing/)
 
+### Scenario 2: Real-Time Notification System
+
+A multi-channel notification system using Azure SignalR Service for real-time in-app delivery, queue-based email routing, Event Grid integration for system events, and user subscription management with daily digest aggregation.
+
+**Triggers:** HTTP, QueueTrigger, EventGridTrigger, TimerTrigger, SignalR (negotiate + output binding)
+**Key patterns:** SignalR serverless integration, multi-channel fan-out delivery, queue-based routing, user preference management
+**Source:** [`src/Scenario02.RealtimeNotifications/`](src/Scenario02.RealtimeNotifications/)
+
 ### Scenario 3: Event-Driven Microservices Orchestration
 
 A distributed order fulfillment system using the saga pattern to coordinate inventory reservation, payment processing, and shipment creation. Failed steps trigger compensating transactions in reverse order. Orders can arrive via Service Bus or the HTTP API.
@@ -30,6 +40,14 @@ A distributed order fulfillment system using the saga pattern to coordinate inve
 **Triggers:** ServiceBusTrigger, EventGridTrigger, Durable Functions (Orchestration + Activity), HTTP
 **Key patterns:** Saga orchestrator with compensation, Cosmos DB repository, dead-letter routing, event-driven inventory alerts
 **Source:** [`src/Scenario03.EventDrivenOrchestration/`](src/Scenario03.EventDrivenOrchestration/)
+
+### Scenario 5: Scheduled ETL Pipeline
+
+A scheduled ETL pipeline using Durable Functions fan-out/fan-in pattern. Extracts data from three sources in parallel (API, CSV, database), merges results, validates against configurable rules, transforms with field mappings, and loads to blob storage.
+
+**Triggers:** TimerTrigger, HTTP, Durable Functions (Orchestration + Activity)
+**Key patterns:** Fan-out/fan-in orchestration, multi-stage pipeline (raw → validated → transformed → output), rule-based validation, partial failure tolerance
+**Source:** [`src/Scenario05.ScheduledEtlPipeline/`](src/Scenario05.ScheduledEtlPipeline/)
 
 ## Project Structure
 
@@ -46,25 +64,40 @@ Azure-Func-ee/
 │   │   ├── Functions/                   # ProcessNewDocument, ProcessDocument, GenerateProcessingReport, GetDocumentStatus
 │   │   ├── Models/                      # DocumentMetadata, DocumentProcessingMessage, DocumentProcessingOptions
 │   │   └── Services/                    # IDocumentRepository, IDocumentProcessingService, IClassificationService
-│   └── Scenario03.EventDrivenOrchestration/  # Order orchestration function app
-│       ├── Functions/                   # OrderSagaOrchestrator, ProcessOrder, OrderApi, HandleInventoryEvent
-│       │   └── Activities/              # ReserveInventory, ProcessPayment, CreateShipment + compensations
-│       ├── Models/                      # Order, SagaState, OrderResult, OrderProcessingOptions
-│       │   ├── Dtos/                    # CreateOrderRequest, OrderResponse, OrderItemDto
-│       │   └── Events/                  # InventoryEvent
-│       ├── Repositories/               # IOrderRepository, CosmosDbOrderRepository
-│       └── Services/                    # IOrderService, IInventoryService, IPaymentService
+│   ├── Scenario02.RealtimeNotifications/  # Real-time notifications function app
+│   │   ├── Functions/                   # Negotiate, SendNotification, ProcessNotification, BroadcastRealtime, SendDigest, ManageSubscriptions, HandleSystemEvent
+│   │   ├── Models/                      # Notification, UserSubscription, NotificationOptions
+│   │   ├── Repositories/               # INotificationRepository, ISubscriptionRepository
+│   │   └── Services/                    # INotificationService, IEmailService, ITemplateService
+│   ├── Scenario03.EventDrivenOrchestration/  # Order orchestration function app
+│   │   ├── Functions/                   # OrderSagaOrchestrator, ProcessOrder, OrderApi, HandleInventoryEvent
+│   │   │   └── Activities/              # ReserveInventory, ProcessPayment, CreateShipment + compensations
+│   │   ├── Models/                      # Order, SagaState, OrderResult, OrderProcessingOptions
+│   │   │   ├── Dtos/                    # CreateOrderRequest, OrderResponse, OrderItemDto
+│   │   │   └── Events/                  # InventoryEvent
+│   │   ├── Repositories/               # IOrderRepository, CosmosDbOrderRepository
+│   │   └── Services/                    # IOrderService, IInventoryService, IPaymentService
+│   └── Scenario05.ScheduledEtlPipeline/  # ETL pipeline function app
+│       ├── Functions/                   # ScheduledEtl, TriggerEtl, GetPipelineStatus, EtlOrchestrator
+│       │   └── Activities/              # ExtractFromApi, ExtractFromCsv, ExtractFromDatabase, Validate, Transform, Load
+│       ├── Models/                      # PipelineRun, DataRecord, ValidationRule, TransformationMapping, EtlOptions
+│       ├── Repositories/               # IPipelineRepository, TableStoragePipelineRepository
+│       └── Services/                    # IPipelineService, IDataValidator, IDataTransformer, IExternalApiClient
 ├── tests/
 │   ├── AzureFunctions.Shared.Tests/
 │   ├── Scenario01.DocumentProcessing.Tests/
+│   ├── Scenario02.RealtimeNotifications.Tests/
 │   ├── Scenario03.EventDrivenOrchestration.Tests/
+│   ├── Scenario05.ScheduledEtlPipeline.Tests/
 │   └── Integration.Tests/
 ├── terraform/
 │   ├── modules/
 │   │   ├── core-infrastructure/         # Resource group, VNet, Key Vault, Log Analytics
 │   │   ├── function-app/                # Reusable function app with slots, diagnostics
 │   │   ├── document-processing/         # Blob, queue, table storage + function app
-│   │   └── event-orchestration/         # Service Bus, Event Grid, Cosmos DB + function app
+│   │   ├── realtime-notifications/      # SignalR, queues, tables + function app
+│   │   ├── event-orchestration/         # Service Bus, Event Grid, Cosmos DB + function app
+│   │   └── scheduled-etl-pipeline/      # Blob containers, table, Durable storage + function app
 │   └── environments/
 │       └── dev/                         # Dev environment composition
 ├── .github/workflows/
