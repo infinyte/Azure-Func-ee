@@ -11,13 +11,13 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <MicrosoftAzureFunctionsWorkerVersion>2.1.0</MicrosoftAzureFunctionsWorkerVersion>
+    <MicrosoftAzureFunctionsWorkerVersion>2.51.0</MicrosoftAzureFunctionsWorkerVersion>
     <MicrosoftAzureFunctionsWorkerSdkVersion>1.17.4</MicrosoftAzureFunctionsWorkerSdkVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsHttpVersion>2.1.0</MicrosoftAzureFunctionsWorkerExtensionsHttpVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsStorageBlobsVersion>6.6.0</MicrosoftAzureFunctionsWorkerExtensionsStorageBlobsVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsStorageQueuesVersion>5.5.0</MicrosoftAzureFunctionsWorkerExtensionsStorageQueuesVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsTimerVersion>4.3.1</MicrosoftAzureFunctionsWorkerExtensionsTimerVersion>
-    <MicrosoftAzureFunctionsWorkerExtensionsServiceBusVersion>5.22.0</MicrosoftAzureFunctionsWorkerExtensionsServiceBusVersion>
+    <MicrosoftAzureFunctionsWorkerExtensionsServiceBusVersion>5.24.0</MicrosoftAzureFunctionsWorkerExtensionsServiceBusVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsEventGridVersion>3.4.2</MicrosoftAzureFunctionsWorkerExtensionsEventGridVersion>
     <MicrosoftAzureFunctionsDurableTaskVersion>1.1.5</MicrosoftAzureFunctionsDurableTaskVersion>
     <MicrosoftExtensionsHttpVersion>8.0.1</MicrosoftExtensionsHttpVersion>
@@ -26,9 +26,9 @@
     <AzureDataTablesVersion>12.11.0</AzureDataTablesVersion>
     <AzureStorageBlobsVersion>12.22.2</AzureStorageBlobsVersion>
     <AzureStorageQueuesVersion>12.20.1</AzureStorageQueuesVersion>
-    <AzureMessagingServiceBusVersion>7.18.2</AzureMessagingServiceBusVersion>
+    <AzureMessagingServiceBusVersion>7.20.1</AzureMessagingServiceBusVersion>
     <AzureMessagingEventGridVersion>4.25.0</AzureMessagingEventGridVersion>
-    <MicrosoftAzureCosmosVersion>3.43.1</MicrosoftAzureCosmosVersion>
+    <MicrosoftAzureCosmosVersion>3.57.0</MicrosoftAzureCosmosVersion>
     <MicrosoftExtensionsResilienceVersion>8.10.0</MicrosoftExtensionsResilienceVersion>
     <PollyVersion>8.4.2</PollyVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsSignalRServiceVersion>1.14.0</MicrosoftAzureFunctionsWorkerExtensionsSignalRServiceVersion>
@@ -36,7 +36,7 @@
     <xunitRunnerVersion>3.0.0</xunitRunnerVersion>
     <MoqVersion>4.20.72</MoqVersion>
     <FluentAssertionsVersion>6.12.2</FluentAssertionsVersion>
-    <CoverletVersion>6.0.2</CoverletVersion>
+    <CoverletVersion>6.0.4</CoverletVersion>
     <MicrosoftTestSdkVersion>17.11.1</MicrosoftTestSdkVersion>
   </PropertyGroup>
 </Project>
