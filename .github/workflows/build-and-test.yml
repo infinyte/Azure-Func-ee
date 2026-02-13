@@ -45,7 +45,7 @@ jobs:
           --results-directory ./coverage
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-report
           path: ./coverage/**/coverage.cobertura.xml
@@ -80,7 +80,7 @@ jobs:
           --output ./publish/Scenario05.ScheduledEtlPipeline
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: function-app-builds
           path: ./publish/
