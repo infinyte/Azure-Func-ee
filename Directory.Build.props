@@ -14,7 +14,7 @@
     <MicrosoftAzureFunctionsWorkerVersion>2.1.0</MicrosoftAzureFunctionsWorkerVersion>
     <MicrosoftAzureFunctionsWorkerSdkVersion>1.17.4</MicrosoftAzureFunctionsWorkerSdkVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsHttpVersion>2.1.0</MicrosoftAzureFunctionsWorkerExtensionsHttpVersion>
-    <MicrosoftAzureFunctionsWorkerExtensionsStorageBlobsVersion>6.6.0</MicrosoftAzureFunctionsWorkerExtensionsStorageBlobsVersion>
+    <MicrosoftAzureFunctionsWorkerExtensionsStorageBlobsVersion>6.8.0</MicrosoftAzureFunctionsWorkerExtensionsStorageBlobsVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsStorageQueuesVersion>5.5.0</MicrosoftAzureFunctionsWorkerExtensionsStorageQueuesVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsTimerVersion>4.3.1</MicrosoftAzureFunctionsWorkerExtensionsTimerVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsServiceBusVersion>5.22.0</MicrosoftAzureFunctionsWorkerExtensionsServiceBusVersion>
@@ -24,7 +24,7 @@
     <MicrosoftExtensionsOptionsVersion>8.0.2</MicrosoftExtensionsOptionsVersion>
     <MicrosoftApplicationInsightsWorkerServiceVersion>2.22.0</MicrosoftApplicationInsightsWorkerServiceVersion>
     <AzureDataTablesVersion>12.9.1</AzureDataTablesVersion>
-    <AzureStorageBlobsVersion>12.22.2</AzureStorageBlobsVersion>
+    <AzureStorageBlobsVersion>12.23.0</AzureStorageBlobsVersion>
     <AzureStorageQueuesVersion>12.20.1</AzureStorageQueuesVersion>
     <AzureMessagingServiceBusVersion>7.18.2</AzureMessagingServiceBusVersion>
     <AzureMessagingEventGridVersion>4.25.0</AzureMessagingEventGridVersion>
