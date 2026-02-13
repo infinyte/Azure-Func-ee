@@ -83,7 +83,7 @@ jobs:
           --output ./publish/Scenario05.ScheduledEtlPipeline
 
       - name: Upload published artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: function-app-packages
           path: ./publish/
