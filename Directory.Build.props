@@ -25,7 +25,7 @@
     <MicrosoftApplicationInsightsWorkerServiceVersion>2.22.0</MicrosoftApplicationInsightsWorkerServiceVersion>
     <AzureDataTablesVersion>12.9.1</AzureDataTablesVersion>
     <AzureStorageBlobsVersion>12.22.2</AzureStorageBlobsVersion>
-    <AzureStorageQueuesVersion>12.20.1</AzureStorageQueuesVersion>
+    <AzureStorageQueuesVersion>12.25.0</AzureStorageQueuesVersion>
     <AzureMessagingServiceBusVersion>7.18.2</AzureMessagingServiceBusVersion>
     <AzureMessagingEventGridVersion>4.25.0</AzureMessagingEventGridVersion>
     <MicrosoftAzureCosmosVersion>3.43.1</MicrosoftAzureCosmosVersion>
