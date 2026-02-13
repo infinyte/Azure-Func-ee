@@ -22,8 +22,8 @@
     <MicrosoftAzureFunctionsDurableTaskVersion>1.1.5</MicrosoftAzureFunctionsDurableTaskVersion>
     <MicrosoftExtensionsHttpVersion>8.0.1</MicrosoftExtensionsHttpVersion>
     <MicrosoftExtensionsOptionsVersion>8.0.2</MicrosoftExtensionsOptionsVersion>
-    <MicrosoftApplicationInsightsWorkerServiceVersion>3.0.0</MicrosoftApplicationInsightsWorkerServiceVersion>
-    <AzureDataTablesVersion>12.9.1</AzureDataTablesVersion>
+    <MicrosoftApplicationInsightsWorkerServiceVersion>2.22.0</MicrosoftApplicationInsightsWorkerServiceVersion>
+    <AzureDataTablesVersion>12.11.0</AzureDataTablesVersion>
     <AzureStorageBlobsVersion>12.22.2</AzureStorageBlobsVersion>
     <AzureStorageQueuesVersion>12.20.1</AzureStorageQueuesVersion>
     <AzureMessagingServiceBusVersion>7.20.1</AzureMessagingServiceBusVersion>
