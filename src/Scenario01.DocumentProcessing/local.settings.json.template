@@ -1,0 +1,14 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": "<your-application-insights-connection-string>",
+    "DocumentProcessing:StorageConnectionName": "AzureWebJobsStorage",
+    "DocumentProcessing:DocumentsContainer": "documents",
+    "DocumentProcessing:ProcessingQueue": "document-processing",
+    "DocumentProcessing:TableName": "documentmetadata",
+    "DocumentProcessing:MaxRetryAttempts": "3",
+    "DocumentProcessing:ProcessingTimeoutSeconds": "120"
+  }
+}

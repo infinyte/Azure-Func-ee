@@ -1,0 +1,37 @@
+{
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "excludedTypes": "Request"
+      },
+      "enableLiveMetricsFilters": true
+    },
+    "logLevel": {
+      "default": "Information",
+      "Microsoft.Azure.WebJobs.Extensions.DurableTask": "Information",
+      "Microsoft.Azure.Functions.Worker": "Information"
+    }
+  },
+  "extensions": {
+    "serviceBus": {
+      "prefetchCount": 0,
+      "maxConcurrentCalls": 16,
+      "autoCompleteMessages": false,
+      "maxAutoLockRenewalDuration": "00:05:00"
+    },
+    "durableTask": {
+      "storageProvider": {
+        "type": "AzureStorage",
+        "connectionStringName": "AzureWebJobsStorage"
+      },
+      "tracing": {
+        "traceInputsAndOutputs": false,
+        "traceReplayEvents": false
+      },
+      "maxConcurrentActivityFunctions": 10,
+      "maxConcurrentOrchestratorFunctions": 5
+    }
+  }
+}

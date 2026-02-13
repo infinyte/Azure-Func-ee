@@ -1,0 +1,15 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": "<your-app-insights-connection-string>",
+    "ServiceBusConnection": "<your-service-bus-connection-string>",
+    "OrderProcessing:CosmosConnectionString": "<your-cosmos-db-connection-string>",
+    "OrderProcessing:CosmosDatabaseName": "orders-db",
+    "OrderProcessing:CosmosContainerName": "orders",
+    "OrderProcessing:SagaTimeoutMinutes": "5",
+    "InventoryService:BaseUrl": "https://localhost:5001",
+    "PaymentService:BaseUrl": "https://localhost:5002"
+  }
+}

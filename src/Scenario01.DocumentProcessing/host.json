@@ -1,0 +1,33 @@
+{
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "excludedTypes": "Request"
+      },
+      "enableLiveMetrics": true
+    },
+    "logLevel": {
+      "default": "Information",
+      "Host.Results": "Error",
+      "Function": "Information",
+      "Host.Aggregator": "Trace"
+    }
+  },
+  "extensions": {
+    "queues": {
+      "batchSize": 16,
+      "maxDequeueCount": 5,
+      "visibilityTimeout": "00:05:00",
+      "newBatchThreshold": 8,
+      "maxPollingInterval": "00:00:02"
+    },
+    "blobs": {
+      "maxDegreeOfParallelism": 4
+    }
+  },
+  "functionTimeout": "00:10:00",
+  "watchDirectories": [],
+  "watchFiles": []
+}

@@ -1,0 +1,3 @@
+project_name = "azfunc-portfolio"
+environment  = "dev"
+location     = "eastus2"

@@ -1,0 +1,73 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "*.sln"
+      - "Directory.Build.props"
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "*.sln"
+      - "Directory.Build.props"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore Azure-Functions-Portfolio.sln
+
+      - name: Build
+        run: dotnet build Azure-Functions-Portfolio.sln --configuration Release --no-restore
+
+      - name: Test
+        run: >
+          dotnet test Azure-Functions-Portfolio.sln
+          --configuration Release
+          --no-build
+          --verbosity normal
+          --collect:"XPlat Code Coverage"
+          --results-directory ./coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ./coverage/**/coverage.cobertura.xml
+          retention-days: 14
+
+      - name: Publish Scenario01.DocumentProcessing
+        run: >
+          dotnet publish src/Scenario01.DocumentProcessing/Scenario01.DocumentProcessing.csproj
+          --configuration Release
+          --no-build
+          --output ./publish/Scenario01.DocumentProcessing
+
+      - name: Publish Scenario03.EventDrivenOrchestration
+        run: >
+          dotnet publish src/Scenario03.EventDrivenOrchestration/Scenario03.EventDrivenOrchestration.csproj
+          --configuration Release
+          --no-build
+          --output ./publish/Scenario03.EventDrivenOrchestration
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: function-app-builds
+          path: ./publish/
+          retention-days: 7
