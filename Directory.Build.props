@@ -28,7 +28,7 @@
     <AzureStorageQueuesVersion>12.20.1</AzureStorageQueuesVersion>
     <AzureMessagingServiceBusVersion>7.20.1</AzureMessagingServiceBusVersion>
     <AzureMessagingEventGridVersion>4.25.0</AzureMessagingEventGridVersion>
-    <MicrosoftAzureCosmosVersion>3.43.1</MicrosoftAzureCosmosVersion>
+    <MicrosoftAzureCosmosVersion>3.57.0</MicrosoftAzureCosmosVersion>
     <MicrosoftExtensionsResilienceVersion>8.10.0</MicrosoftExtensionsResilienceVersion>
     <PollyVersion>8.4.2</PollyVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsSignalRServiceVersion>1.14.0</MicrosoftAzureFunctionsWorkerExtensionsSignalRServiceVersion>
