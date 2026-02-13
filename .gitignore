@@ -45,3 +45,5 @@ Desktop.ini
 # Build artifacts
 publish/
 artifacts/
+.claude/settings.local.json
+CLAUDE.md
