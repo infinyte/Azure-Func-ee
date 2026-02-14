@@ -29,17 +29,7 @@ public sealed class ApplicationInsightsTelemetryService : ITelemetryService
     /// <inheritdoc />
     public void TrackMetric(string name, double value, IDictionary<string, string>? properties = null)
     {
-        var metric = new MetricTelemetry(name, value);
-
-        if (properties is not null)
-        {
-            foreach (var kvp in properties)
-            {
-                metric.Properties[kvp.Key] = kvp.Value;
-            }
-        }
-
-        _telemetryClient.TrackMetric(metric);
+        _telemetryClient.TrackMetric(name, value, properties);
     }
 
     /// <inheritdoc />
