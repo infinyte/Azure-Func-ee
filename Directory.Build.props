@@ -21,7 +21,7 @@
     <MicrosoftAzureFunctionsWorkerExtensionsEventGridVersion>3.4.2</MicrosoftAzureFunctionsWorkerExtensionsEventGridVersion>
     <MicrosoftAzureFunctionsDurableTaskVersion>1.1.5</MicrosoftAzureFunctionsDurableTaskVersion>
     <MicrosoftExtensionsHttpVersion>8.0.1</MicrosoftExtensionsHttpVersion>
-    <MicrosoftExtensionsOptionsVersion>8.0.2</MicrosoftExtensionsOptionsVersion>
+    <MicrosoftExtensionsOptionsVersion>10.0.3</MicrosoftExtensionsOptionsVersion>
     <MicrosoftApplicationInsightsWorkerServiceVersion>2.22.0</MicrosoftApplicationInsightsWorkerServiceVersion>
     <AzureDataTablesVersion>12.11.0</AzureDataTablesVersion>
     <AzureStorageBlobsVersion>12.22.2</AzureStorageBlobsVersion>
