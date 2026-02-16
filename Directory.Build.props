@@ -19,7 +19,7 @@
     <MicrosoftAzureFunctionsWorkerExtensionsTimerVersion>4.3.1</MicrosoftAzureFunctionsWorkerExtensionsTimerVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsServiceBusVersion>5.24.0</MicrosoftAzureFunctionsWorkerExtensionsServiceBusVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsEventGridVersion>3.4.2</MicrosoftAzureFunctionsWorkerExtensionsEventGridVersion>
-    <MicrosoftAzureFunctionsDurableTaskVersion>1.1.5</MicrosoftAzureFunctionsDurableTaskVersion>
+    <MicrosoftAzureFunctionsDurableTaskVersion>1.14.1</MicrosoftAzureFunctionsDurableTaskVersion>
     <MicrosoftExtensionsHttpVersion>8.0.1</MicrosoftExtensionsHttpVersion>
     <MicrosoftExtensionsOptionsVersion>8.0.2</MicrosoftExtensionsOptionsVersion>
     <MicrosoftApplicationInsightsWorkerServiceVersion>2.22.0</MicrosoftApplicationInsightsWorkerServiceVersion>
