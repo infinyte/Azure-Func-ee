@@ -29,7 +29,7 @@
     <AzureMessagingServiceBusVersion>7.20.1</AzureMessagingServiceBusVersion>
     <AzureMessagingEventGridVersion>4.25.0</AzureMessagingEventGridVersion>
     <MicrosoftAzureCosmosVersion>3.57.0</MicrosoftAzureCosmosVersion>
-    <MicrosoftExtensionsResilienceVersion>8.10.0</MicrosoftExtensionsResilienceVersion>
+    <MicrosoftExtensionsResilienceVersion>10.3.0</MicrosoftExtensionsResilienceVersion>
     <PollyVersion>8.4.2</PollyVersion>
     <MicrosoftAzureFunctionsWorkerExtensionsSignalRServiceVersion>1.14.0</MicrosoftAzureFunctionsWorkerExtensionsSignalRServiceVersion>
     <xunitVersion>2.9.3</xunitVersion>
