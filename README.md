@@ -165,6 +165,7 @@ Three GitHub Actions workflows automate the full lifecycle:
 - [Developer Guide](docs/developer-guide.md) -- Local setup, debugging, testing, coding standards
 - [Deployment Guide](docs/deployment-guide.md) -- Terraform setup, deployment steps, blue/green, rollback
 - [Terraform Reference](terraform/README.md) -- Module structure, variables, usage
+- [Portfolio Overview](docs/Portfolio.md) -- Deep Dive into project scenarios
 
 ## License
 
