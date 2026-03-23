@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Functions Portfolio</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #333; line-height: 1.6; }
+        header { background: linear-gradient(135deg, #0078d4 0%, #107c10 100%); color: white; padding: 3rem 2rem; text-align: center; }
+        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        header p { font-size: 1.2rem; opacity: 0.9; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 2rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin: 3rem 0; }
+        .card { border: 1px solid #ddd; border-radius: 8px; padding: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card h3 { color: #0078d4; margin-bottom: 1rem; }
+        .card ul { list-style: none; padding-left: 0; }
+        .card li:before { content: "▸ "; color: #107c10; margin-right: 0.5rem; }
+        .stats { display: flex; gap: 2rem; justify-content: center; margin: 3rem 0; flex-wrap: wrap; }
+        .stat { text-align: center; }
+        .stat .number { font-size: 2rem; font-weight: bold; color: #0078d4; }
+        .stat .label { color: #666; margin-top: 0.5rem; }
+        .cta { background: #0078d4; color: white; padding: 1rem 2rem; border-radius: 4px; text-decoration: none; display: inline-block; margin: 1rem 0; }
+        .cta:hover { background: #106ebe; }
+        footer { background: #f5f5f5; padding: 2rem; text-align: center; margin-top: 3rem; color: #666; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Azure Functions Portfolio</h1>
+        <p>Production-Grade Patterns & Enterprise Architecture</p>
+    </header>
+    
+    <div class="container">
+        <div class="stats">
+            <div class="stat">
+                <div class="number">4</div>
+                <div class="label">Scenarios</div>
+            </div>
+            <div class="stat">
+                <div class="number">20+</div>
+                <div class="label">Functions</div>
+            </div>
+            <div class="stat">
+                <div class="number">95%</div>
+                <div class="label">Test Coverage</div>
+            </div>
+            <div class="stat">
+                <div class="number">6</div>
+                <div class="label">Terraform Modules</div>
+            </div>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h3>📄 Scenario 1: Document Processing</h3>
+                <p>Event-driven pipeline with blob triggers, queue processing, and daily reporting.</p>
+                <ul>
+                    <li>BlobTrigger → QueueTrigger → TimerTrigger</li>
+                    <li>Table Storage repository</li>
+                    <li>Daily aggregation reporting</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3>🔔 Scenario 2: Real-Time Notifications</h3>
+                <p>Multi-channel notification system with SignalR, email routing, and user preferences.</p>
+                <ul>
+                    <li>SignalR serverless integration</li>
+                    <li>Multi-channel fan-out</li>
+                    <li>Event Grid integration</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3>🛒 Scenario 3: Order Orchestration</h3>
+                <p>Saga pattern with automatic compensation for distributed order fulfillment.</p>
+                <ul>
+                    <li>Durable Functions orchestration</li>
+                    <li>Saga pattern + compensation</li>
+                    <li>Cosmos DB persistence</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3>⚙️ Scenario 5: ETL Pipeline</h3>
+                <p>Fan-out/fan-in orchestration extracting from 3 sources with validation and transformation.</p>
+                <ul>
+                    <li>Parallel extraction (fan-out)</li>
+                    <li>Sequential validation + transform</li>
+                    <li>Partial failure tolerance</li>
+                </ul>
+            </div>
+        </div>
+        
+        <h2>Key Patterns</h2>
+        <ul style="margin: 2rem 0; padding-left: 2rem;">
+            <li><strong>Saga Pattern:</strong> Distributed transactions with automatic compensation</li>
+            <li><strong>Fan-Out/Fan-In:</strong> Parallel extraction with sequential processing</li>
+            <li><strong>Middleware Pipeline:</strong> Correlation ID and exception handling</li>
+            <li><strong>Repository Pattern:</strong> Abstraction over Table Storage and Cosmos DB</li>
+            <li><strong>Polly Resilience:</strong> Retry, circuit breaker, timeout on HTTP clients</li>
+            <li><strong>Managed Identity:</strong> Zero Trust authentication with private endpoints</li>
+            <li><strong>Blue/Green Deployment:</strong> Zero-downtime updates with automatic rollback</li>
+        </ul>
+        
+        <a href="https://github.com/infinyte/Azure-Func-ee" class="cta">View on GitHub</a>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 Kurt Mitchell | <a href="https://github.com/infinyte" style="color: #0078d4;">@infinyte</a></p>
+    </footer>
+</body>
+</html>
