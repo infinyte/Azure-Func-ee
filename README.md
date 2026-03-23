@@ -1,6 +1,14 @@
 # Azure Functions Portfolio -- Production-Grade Patterns
 
-A portfolio of production-grade Azure Functions implementations built on .NET 8 isolated worker model. Each scenario demonstrates real-world architectural patterns with clean separation of concerns, infrastructure as code, CI/CD automation, and comprehensive testing.
+Azure Functions Production-Grade Patterns is a masterclass in enterprise distributed systems architecture using serverless Azure compute. The portfolio demonstrates:
+
+Architectural Excellence -- Saga patterns, fan-out/fan-in orchestration, middleware pipelines, repository abstractions
+Production Readiness -- Zero Trust networking, managed identity, private endpoints, blue/green deployments
+Resilience Engineering -- Polly v8 strategies, dead-letter handling, automatic compensation
+Infrastructure Mastery -- Modular Terraform, OIDC-based CI/CD, zero-downtime deployments
+Code Quality -- 95% test coverage, centralized cross-cutting concerns, SOLID principles, clear separation of concerns
+
+This project answers the question: "How do I build enterprise-grade Azure Functions applications?" It's a comprehensive reference for architects and senior engineers designing distributed systems on Azure.
 
 ## Highlights
 
