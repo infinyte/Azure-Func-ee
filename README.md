@@ -1,14 +1,31 @@
 # Azure Functions Portfolio -- Production-Grade Patterns
 
+> **TL;DR:** A reference portfolio of four Azure Functions scenarios (document processing, real-time notifications, saga orchestration, and scheduled ETL) demonstrating production-grade patterns: Durable Functions, Polly v8 resilience, managed identity, private endpoints, blue/green deployments, and modular Terraform.
+
 Azure Functions Production-Grade Patterns is a masterclass in enterprise distributed systems architecture using serverless Azure compute. The portfolio demonstrates:
 
-Architectural Excellence -- Saga patterns, fan-out/fan-in orchestration, middleware pipelines, repository abstractions
-Production Readiness -- Zero Trust networking, managed identity, private endpoints, blue/green deployments
-Resilience Engineering -- Polly v8 strategies, dead-letter handling, automatic compensation
-Infrastructure Mastery -- Modular Terraform, OIDC-based CI/CD, zero-downtime deployments
-Code Quality -- 95% test coverage, centralized cross-cutting concerns, SOLID principles, clear separation of concerns
+- **Architectural Excellence** -- Saga patterns, fan-out/fan-in orchestration, middleware pipelines, repository abstractions
+- **Production Readiness** -- Zero Trust networking, managed identity, private endpoints, blue/green deployments
+- **Resilience Engineering** -- Polly v8 strategies, dead-letter handling, automatic compensation
+- **Infrastructure Mastery** -- Modular Terraform, OIDC-based CI/CD, zero-downtime deployments
+- **Code Quality** -- 95% test coverage, centralized cross-cutting concerns, SOLID principles, clear separation of concerns
 
 This project answers the question: "How do I build enterprise-grade Azure Functions applications?" It's a comprehensive reference for architects and senior engineers designing distributed systems on Azure.
+
+## Table of Contents
+
+- [Highlights](#highlights)
+- [Scenarios](#scenarios)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+  - [Quickstart](#quickstart)
+  - [Prerequisites](#prerequisites)
+  - [Configuration](#configuration)
+  - [Local Development](#local-development)
+- [Architecture Principles](#architecture-principles)
+- [CI/CD](#cicd)
+- [Documentation](#documentation)
+- [License](#license)
 
 ## Highlights
 
@@ -48,6 +65,10 @@ A distributed order fulfillment system using the saga pattern to coordinate inve
 **Triggers:** ServiceBusTrigger, EventGridTrigger, Durable Functions (Orchestration + Activity), HTTP
 **Key patterns:** Saga orchestrator with compensation, Cosmos DB repository, dead-letter routing, event-driven inventory alerts
 **Source:** [`src/Scenario03.EventDrivenOrchestration/`](src/Scenario03.EventDrivenOrchestration/)
+
+### Scenario 4 *(not included)*
+
+> Scenario 4 is intentionally omitted from this portfolio and reserved for a future scenario.
 
 ### Scenario 5: Scheduled ETL Pipeline
 
@@ -119,12 +140,49 @@ Azure-Func-ee/
 
 ## Getting Started
 
+### Quickstart
+
+> Get a scenario running locally in under five minutes.
+
+**Required tools:** .NET 8 SDK, Azure Functions Core Tools v4, Azurite
+
+```bash
+# 1. Restore and build
+dotnet restore Azure-Functions-Portfolio.sln
+dotnet build Azure-Functions-Portfolio.sln
+
+# 2. Start the local storage emulator
+azurite --silent --location .azurite --debug .azurite/debug.log
+
+# 3. Run a scenario (e.g., Scenario 1 -- Document Processing)
+cd src/Scenario01.DocumentProcessing
+func start
+```
+
+See [Prerequisites](#prerequisites) and [Local Development](#local-development) below for full setup details, and the [Deployment Guide](docs/deployment-guide.md) for Terraform-based cloud deployment.
+
 ### Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (8.0.400 or later)
 - [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
 - [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) (local storage emulator)
 - [Terraform](https://www.terraform.io/downloads) >= 1.5 (for infrastructure deployment)
+
+### Configuration
+
+Each scenario uses a `local.settings.json` file for local development configuration. This file is excluded from source control (`.gitignore`) and should **never be committed** -- it may contain connection strings or secrets.
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
+  }
+}
+```
+
+> **Local vs. deployed:** In deployed environments all Azure service connections use `DefaultAzureCredential` (managed identity). Connection strings in `local.settings.json` are used only when running against Azurite or a local emulator during development.
 
 ### Local Development
 
