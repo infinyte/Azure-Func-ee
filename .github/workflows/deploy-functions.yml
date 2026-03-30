@@ -245,7 +245,7 @@ jobs:
           fi
 
       - name: Swap staging to production - Scenario01
-        uses: azure/CLI@v2
+        uses: azure/CLI@v3
         with:
           inlineScript: |
             az webapp deployment slot swap \
@@ -255,7 +255,7 @@ jobs:
               --target-slot production
 
       - name: Swap staging to production - Scenario02
-        uses: azure/CLI@v2
+        uses: azure/CLI@v3
         with:
           inlineScript: |
             az webapp deployment slot swap \
@@ -265,7 +265,7 @@ jobs:
               --target-slot production
 
       - name: Swap staging to production - Scenario03
-        uses: azure/CLI@v2
+        uses: azure/CLI@v3
         with:
           inlineScript: |
             az webapp deployment slot swap \
@@ -275,7 +275,7 @@ jobs:
               --target-slot production
 
       - name: Swap staging to production - Scenario05
-        uses: azure/CLI@v2
+        uses: azure/CLI@v3
         with:
           inlineScript: |
             az webapp deployment slot swap \
